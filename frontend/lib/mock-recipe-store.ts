@@ -1,13 +1,13 @@
 import {
   CreateRecipeInput,
   RECIPE_TYPES,
-  RecipeDetailDto,
-  RecipeListItemDto,
+  RecipeDetail,
+  RecipeListItem,
 } from "@/lib/types/recipe";
 
 const STORAGE_KEY = "recipe-app-mock-recipes";
 
-const initialRecipes: RecipeDetailDto[] = [
+const initialRecipes: RecipeDetail[] = [
   {
     id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     name: "Köttbullar med potatismos",
@@ -27,7 +27,7 @@ const initialRecipes: RecipeDetailDto[] = [
   },
 ];
 
-function readStore(): RecipeDetailDto[] {
+function readStore(): RecipeDetail[] {
   if (typeof window === "undefined") {
     return initialRecipes;
   }
@@ -38,10 +38,10 @@ function readStore(): RecipeDetailDto[] {
     return initialRecipes;
   }
 
-  return JSON.parse(stored) as RecipeDetailDto[];
+  return JSON.parse(stored) as RecipeDetail[];
 }
 
-function writeStore(recipes: RecipeDetailDto[]): void {
+function writeStore(recipes: RecipeDetail[]): void {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
   }
@@ -52,22 +52,22 @@ function createId(): string {
 }
 
 export const mockRecipeStore = {
-  getAll(): RecipeListItemDto[] {
+  getAll(): RecipeListItem[] {
     return readStore().map(({ ingredients, instructions, ...listItem }) => listItem);
   },
 
-  getById(id: string): RecipeDetailDto | undefined {
+  getById(id: string): RecipeDetail | undefined {
     return readStore().find((recipe) => recipe.id === id);
   },
 
-  create(input: CreateRecipeInput): RecipeDetailDto {
+  create(input: CreateRecipeInput): RecipeDetail {
     const trimmedName = input.name.trim();
     const trimmedUrl = input.url?.trim();
     const trimmedIngredients = input.ingredients?.trim();
     const trimmedInstructions = input.instructions?.trim();
     const isExternal = Boolean(trimmedUrl);
 
-    const recipe: RecipeDetailDto = {
+    const recipe: RecipeDetail = {
       id: createId(),
       name: trimmedName,
       url: isExternal ? trimmedUrl : null,

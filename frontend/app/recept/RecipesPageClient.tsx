@@ -5,13 +5,13 @@ import { AddRecipeDialog } from "@/components/AddRecipeDialog";
 import { RecipeList } from "@/components/RecipeList";
 import { getRecipes } from "@/lib/recipe-service";
 import {
-  RecipeDetailDto,
-  RecipeListItemDto,
+  RecipeDetail,
+  RecipeListItem,
   toListItem,
 } from "@/lib/types/recipe";
 
 export function RecipesPageClient() {
-  const [recipes, setRecipes] = useState<RecipeListItemDto[]>([]);
+  const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,7 +34,7 @@ export function RecipesPageClient() {
     void loadRecipes();
   }, [loadRecipes]);
 
-  function handleRecipeSaved(recipe: RecipeDetailDto) {
+  function handleRecipeSaved(recipe: RecipeDetail) {
     setRecipes((current) => [toListItem(recipe), ...current]);
   }
 

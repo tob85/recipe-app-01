@@ -1,22 +1,22 @@
-export interface RecipeTypeDto {
+export interface RecipeType {
   id: number;
   name: string;
 }
 
-export interface RecipeCategoryDto {
+export interface RecipeCategory {
   id: string;
   name: string;
 }
 
-export interface RecipeListItemDto {
+export interface RecipeListItem {
   id: string;
   name: string;
   url?: string | null;
-  recipeType: RecipeTypeDto;
-  categories: RecipeCategoryDto[];
+  recipeType: RecipeType;
+  categories: RecipeCategory[];
 }
 
-export interface RecipeDetailDto extends RecipeListItemDto {
+export interface RecipeDetail extends RecipeListItem {
   ingredients?: string | null;
   instructions?: string | null;
 }
@@ -33,7 +33,7 @@ export const RECIPE_TYPES = {
   own: { id: 2, name: "Eget" },
 } as const;
 
-export function isExternalRecipe(recipe: RecipeListItemDto): boolean {
+export function isExternalRecipe(recipe: RecipeListItem): boolean {
   return recipe.recipeType.id === RECIPE_TYPES.external.id;
 }
 
@@ -41,6 +41,6 @@ export function toListItem({
   ingredients: _ingredients,
   instructions: _instructions,
   ...listItem
-}: RecipeDetailDto): RecipeListItemDto {
+}: RecipeDetail): RecipeListItem {
   return listItem;
 }

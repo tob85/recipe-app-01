@@ -1,8 +1,8 @@
 import { mockRecipeStore } from "@/lib/mock-recipe-store";
 import {
   CreateRecipeInput,
-  RecipeDetailDto,
-  RecipeListItemDto,
+  RecipeDetail,
+  RecipeListItem,
 } from "@/lib/types/recipe";
 
 function useMockData(): boolean {
@@ -13,7 +13,7 @@ function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 }
 
-export async function getRecipes(): Promise<RecipeListItemDto[]> {
+export async function getRecipes(): Promise<RecipeListItem[]> {
   if (useMockData()) {
     return mockRecipeStore.getAll();
   }
@@ -29,7 +29,7 @@ export async function getRecipes(): Promise<RecipeListItemDto[]> {
   return response.json();
 }
 
-export async function getRecipeById(id: string): Promise<RecipeDetailDto | null> {
+export async function getRecipeById(id: string): Promise<RecipeDetail | null> {
   if (useMockData()) {
     return mockRecipeStore.getById(id) ?? null;
   }
@@ -51,7 +51,7 @@ export async function getRecipeById(id: string): Promise<RecipeDetailDto | null>
 
 export async function createRecipe(
   input: CreateRecipeInput,
-): Promise<RecipeDetailDto> {
+): Promise<RecipeDetail> {
   if (useMockData()) {
     return mockRecipeStore.create(input);
   }

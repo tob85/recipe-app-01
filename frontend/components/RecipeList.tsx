@@ -3,11 +3,11 @@
 import Link from "next/link";
 import {
   isExternalRecipe,
-  RecipeListItemDto,
+  RecipeListItem,
 } from "@/lib/types/recipe";
 
 interface RecipeListProps {
-  recipes: RecipeListItemDto[];
+  recipes: RecipeListItem[];
 }
 
 export function RecipeList({ recipes }: RecipeListProps) {

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getRecipeById } from "@/lib/recipe-service";
-import { RecipeDetailDto } from "@/lib/types/recipe";
+import { RecipeDetail } from "@/lib/types/recipe";
 
 export default function RecipeDetailPage() {
   const params = useParams<{ id: string }>();
-  const [recipe, setRecipe] = useState<RecipeDetailDto | null>(null);
+  const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

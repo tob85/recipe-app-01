@@ -2,12 +2,12 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { createRecipe } from "@/lib/recipe-service";
-import { RecipeDetailDto } from "@/lib/types/recipe";
+import { RecipeDetail } from "@/lib/types/recipe";
 
 interface AddRecipeDialogProps {
   open: boolean;
   onClose: () => void;
-  onSaved: (recipe: RecipeDetailDto) => void;
+  onSaved: (recipe: RecipeDetail) => void;
 }
 
 export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps) {
