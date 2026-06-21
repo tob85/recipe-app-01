@@ -78,6 +78,7 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
   return (
     <dialog
       ref={dialogRef}
+      data-testid="add-recipe-dialog"
       className="w-full max-w-lg rounded-lg border border-neutral-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
       onClose={handleClose}
     >

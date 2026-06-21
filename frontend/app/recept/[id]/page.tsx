@@ -73,7 +73,10 @@ export default function RecipeDetailPage() {
         ← Tillbaka till receptlistan
       </Link>
 
-      <article className="rounded-lg border border-neutral-200 bg-white p-6">
+      <article
+        data-testid="recipe-detail"
+        className="rounded-lg border border-neutral-200 bg-white p-6"
+      >
         <h1 className="mb-6 text-2xl font-semibold text-neutral-900">
           {recipe.name}
         </h1>

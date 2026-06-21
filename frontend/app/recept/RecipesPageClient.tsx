@@ -44,6 +44,7 @@ export function RecipesPageClient() {
         <h1 className="text-2xl font-semibold text-neutral-900">Mina recept</h1>
         <button
           type="button"
+          data-testid="add-recipe-button"
           onClick={() => setIsDialogOpen(true)}
           className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
         >

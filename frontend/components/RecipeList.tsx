@@ -18,9 +18,12 @@ export function RecipeList({ recipes }: RecipeListProps) {
   }
 
   return (
-    <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
+    <ul
+      data-testid="recipe-list"
+      className="divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white"
+    >
       {recipes.map((recipe) => (
-        <li key={recipe.id} className="px-4 py-3">
+        <li key={recipe.id} data-testid="recipe-list-item" className="px-4 py-3">
           <div className="flex items-center gap-3">
             {recipe.url ? (
               <a
@@ -41,7 +44,10 @@ export function RecipeList({ recipes }: RecipeListProps) {
             )}
 
             {isExternalRecipe(recipe) && (
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+              <span
+                data-testid="external-recipe-badge"
+                className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800"
+              >
                 Externt recept
               </span>
             )}
