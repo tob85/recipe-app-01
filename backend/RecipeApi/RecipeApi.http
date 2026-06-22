@@ -1,6 +1,40 @@
 @RecipeApi_HostAddress = http://localhost:5029
 
-GET {{RecipeApi_HostAddress}}/weatherforecast/
+### Get all recipes
+GET {{RecipeApi_HostAddress}}/recipes
 Accept: application/json
+
+###
+
+### Get recipe by id
+GET {{RecipeApi_HostAddress}}/recipes/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+###
+
+### Create recipe
+POST {{RecipeApi_HostAddress}}/recipes
+Content-Type: application/json
+
+{
+  "name": "Pannkakor",
+  "url": "https://example.com/pannkakor"
+}
+
+###
+
+### Update recipe
+PUT {{RecipeApi_HostAddress}}/recipes/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+
+{
+  "name": "Pannkakor",
+  "url": "https://example.com/pannkakor"
+}
+
+###
+
+### Delete recipe
+DELETE {{RecipeApi_HostAddress}}/recipes/00000000-0000-0000-0000-000000000001
 
 ###
