@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RecipeApi.Data;
 using RecipeApi.Models;
 
-namespace RecipeApi.Tests;
+namespace RecipeApi.Tests.Integration;
 
 public class RecipesApiTests(RecipeApiFactory factory) : IClassFixture<RecipeApiFactory>
 {
