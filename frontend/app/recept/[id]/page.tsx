@@ -102,6 +102,13 @@ export default function RecipeDetailPage() {
             </p>
           </section>
         )}
+
+        {recipe.notes && (
+          <section className="mt-6 border-t border-neutral-200 pt-6">
+            <h2 className="mb-2 text-lg font-medium text-neutral-900">Anteckning</h2>
+            <p className="whitespace-pre-line text-neutral-700">{recipe.notes}</p>
+          </section>
+        )}
       </article>
     </main>
   );

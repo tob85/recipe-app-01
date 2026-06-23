@@ -1,16 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { RecipeCategoryEditor } from "@/components/RecipeCategoryEditor";
+import { RecipeNotesEditor } from "@/components/RecipeNotesEditor";
 import {
   isExternalRecipe,
+  RecipeCategory,
   RecipeListItem,
 } from "@/lib/types/recipe";
 
 interface RecipeListProps {
   recipes: RecipeListItem[];
+  categorySuggestions: RecipeCategory[];
+  onRecipeUpdated: (recipe: RecipeListItem) => void;
 }
 
-export function RecipeList({ recipes }: RecipeListProps) {
+export function RecipeList({
+  recipes,
+  categorySuggestions,
+  onRecipeUpdated,
+}: RecipeListProps) {
   if (recipes.length === 0) {
     return (
       <p className="text-neutral-600">Du har inga sparade recept ännu.</p>
@@ -52,6 +61,14 @@ export function RecipeList({ recipes }: RecipeListProps) {
               </span>
             )}
           </div>
+
+          <RecipeCategoryEditor
+            recipe={recipe}
+            suggestions={categorySuggestions}
+            onUpdated={onRecipeUpdated}
+          />
+
+          <RecipeNotesEditor recipe={recipe} onUpdated={onRecipeUpdated} />
         </li>
       ))}
     </ul>

@@ -9,4 +9,6 @@ public class CreateRecipeRequest
     public string? Ingredients { get; set; }
 
     public string? Instructions { get; set; }
+
+    public List<string>? Categories { get; set; }
 }

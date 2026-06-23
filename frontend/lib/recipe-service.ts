@@ -1,6 +1,7 @@
 import { mockRecipeStore } from "@/lib/mock-recipe-store";
 import {
   CreateRecipeInput,
+  RecipeCategory,
   RecipeDetail,
   RecipeListItem,
 } from "@/lib/types/recipe";
@@ -58,6 +59,22 @@ export async function getRecipeById(id: string): Promise<RecipeDetail | null> {
   return response.json();
 }
 
+export async function getCategories(): Promise<RecipeCategory[]> {
+  if (useMockData()) {
+    return mockRecipeStore.getAllCategories();
+  }
+
+  const response = await fetch(`${getApiBaseUrl()}/categories`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Kunde inte hämta kategorier"));
+  }
+
+  return response.json();
+}
+
 export async function createRecipe(
   input: CreateRecipeInput,
 ): Promise<RecipeDetail> {
@@ -73,6 +90,48 @@ export async function createRecipe(
 
   if (!response.ok) {
     throw new Error(await readErrorMessage(response, "Kunde inte spara recept"));
+  }
+
+  return response.json();
+}
+
+export async function addRecipeCategories(
+  recipeId: string,
+  names: string[],
+): Promise<RecipeDetail> {
+  if (useMockData()) {
+    return mockRecipeStore.addCategories(recipeId, names);
+  }
+
+  const response = await fetch(`${getApiBaseUrl()}/recipes/${recipeId}/categories`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ names }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Kunde inte lägga till kategorier"));
+  }
+
+  return response.json();
+}
+
+export async function updateRecipeNotes(
+  recipeId: string,
+  notes: string | null,
+): Promise<RecipeDetail> {
+  if (useMockData()) {
+    return mockRecipeStore.updateNotes(recipeId, notes);
+  }
+
+  const response = await fetch(`${getApiBaseUrl()}/recipes/${recipeId}/notes`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notes }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Kunde inte spara anteckningen"));
   }
 
   return response.json();

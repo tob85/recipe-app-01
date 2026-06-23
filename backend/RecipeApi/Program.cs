@@ -9,6 +9,7 @@ builder.Services.AddDbContext<RecipeDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
