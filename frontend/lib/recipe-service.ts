@@ -10,7 +10,16 @@ function useMockData(): boolean {
 }
 
 function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5029";
+}
+
+async function readErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const text = await response.text();
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export async function getRecipes(): Promise<RecipeListItem[]> {
@@ -23,7 +32,7 @@ export async function getRecipes(): Promise<RecipeListItem[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Kunde inte hämta recept");
+    throw new Error(await readErrorMessage(response, "Kunde inte hämta recept"));
   }
 
   return response.json();
@@ -43,7 +52,7 @@ export async function getRecipeById(id: string): Promise<RecipeDetail | null> {
   }
 
   if (!response.ok) {
-    throw new Error("Kunde inte hämta recept");
+    throw new Error(await readErrorMessage(response, "Kunde inte hämta recept"));
   }
 
   return response.json();
@@ -63,7 +72,7 @@ export async function createRecipe(
   });
 
   if (!response.ok) {
-    throw new Error("Kunde inte spara recept");
+    throw new Error(await readErrorMessage(response, "Kunde inte spara recept"));
   }
 
   return response.json();
