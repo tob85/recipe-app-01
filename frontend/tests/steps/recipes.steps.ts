@@ -167,7 +167,7 @@ When(
       .filter({ has: page.getByRole("link", { name: recipeName }) });
 
     await recipeItem.getByPlaceholder("Lägg till kategori").fill(categoryName);
-    await recipeItem.getByRole("button", { name: "Spara" }).click();
+    await recipeItem.locator('[data-testid^="recipe-category-add-"]').click();
   },
 );
 
