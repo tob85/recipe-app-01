@@ -70,6 +70,10 @@ export function RecipesPageClient() {
     });
   }
 
+  function handleRecipeDeleted(recipeId: string) {
+    setRecipes((current) => current.filter((recipe) => recipe.id !== recipeId));
+  }
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <div className="mb-8 flex items-center justify-between gap-4">
@@ -95,6 +99,7 @@ export function RecipesPageClient() {
           recipes={recipes}
           categorySuggestions={categorySuggestions}
           onRecipeUpdated={handleRecipeUpdated}
+          onRecipeDeleted={handleRecipeDeleted}
         />
       )}
 

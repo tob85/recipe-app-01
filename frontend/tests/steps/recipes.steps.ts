@@ -193,6 +193,17 @@ When(
   },
 );
 
+When(
+  'användaren raderar receptet {string}',
+  async ({ page }, recipeName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await recipeItem.getByRole("button", { name: "Radera" }).click();
+  },
+);
+
 When("användaren inte anger något receptnamn", async ({ page }) => {
   await page.locator("#recipe-name").fill("");
 });
@@ -306,6 +317,14 @@ Then(
       .filter({ has: page.getByRole("link", { name: recipeName }) });
 
     await expect(recipeItem.locator('[data-testid^="recipe-notes-input-"]')).toHaveValue(note);
+  },
+);
+
+Then(
+  'ska receptet {string} inte visas i receptlistan',
+  async ({ page }, recipeName: string) => {
+    await expect(page.getByRole("link", { name: recipeName })).toHaveCount(0);
+    await expect(page.getByTestId("recipe-list-item")).toHaveCount(0);
   },
 );
 

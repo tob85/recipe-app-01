@@ -205,4 +205,14 @@ export const mockRecipeStore = {
 
     return recipe;
   },
+
+  delete(recipeId: string): void {
+    const recipes = readStore().filter((recipe) => recipe.id !== recipeId);
+
+    if (recipes.length === readStore().length) {
+      throw new Error("Receptet hittades inte");
+    }
+
+    writeStore(recipes);
+  },
 };

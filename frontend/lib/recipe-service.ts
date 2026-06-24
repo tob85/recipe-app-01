@@ -136,3 +136,22 @@ export async function updateRecipeNotes(
 
   return response.json();
 }
+
+export async function deleteRecipe(recipeId: string): Promise<void> {
+  if (useMockData()) {
+    mockRecipeStore.delete(recipeId);
+    return;
+  }
+
+  const response = await fetch(`${getApiBaseUrl()}/recipes/${recipeId}`, {
+    method: "DELETE",
+  });
+
+  if (response.status === 404) {
+    throw new Error("Receptet hittades inte");
+  }
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Kunde inte radera receptet"));
+  }
+}

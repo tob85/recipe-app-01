@@ -75,6 +75,15 @@ Feature: Hantera recept
     And användaren sparar extra anteckningen för receptet "Pannkakor"
     Then ska receptet "Pannkakor" ha extra anteckningen "Ta extra vitlök"
 
+  Scenario: Radera recept från listan
+    Given att användaren är på receptsidan
+    And att följande recept finns sparade:
+      | namn        | url | typ  |
+      | Chokladkaka |     | eget |
+    When sidan laddas
+    And användaren raderar receptet "Chokladkaka"
+    Then ska receptet "Chokladkaka" inte visas i receptlistan
+
   Scenario: Receptnamn är obligatoriskt
     Given att användaren har öppnat dialogen för att lägga till recept
     When användaren inte anger något receptnamn
