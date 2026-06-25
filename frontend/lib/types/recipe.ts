@@ -14,6 +14,7 @@ export interface RecipeListItem {
   url?: string | null;
   recipeType: RecipeType;
   categories: RecipeCategory[];
+  notes?: string | null;
 }
 
 export interface RecipeDetail extends RecipeListItem {
@@ -26,6 +27,7 @@ export interface CreateRecipeInput {
   url?: string;
   ingredients?: string;
   instructions?: string;
+  categories?: string[];
 }
 
 export const RECIPE_TYPES = {

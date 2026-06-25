@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { createRecipe } from "@/lib/recipe-service";
-import { RecipeDetail } from "@/lib/types/recipe";
+import { CategoryInput } from "@/components/CategoryInput";
+import { createRecipe, getCategories } from "@/lib/recipe-service";
+import { validateRecipeInput } from "@/lib/recipe-validation";
+import { RecipeCategory, RecipeDetail } from "@/lib/types/recipe";
 
 interface AddRecipeDialogProps {
   open: boolean;
@@ -10,12 +12,17 @@ interface AddRecipeDialogProps {
   onSaved: (recipe: RecipeDetail) => void;
 }
 
+const HELP_TEXT =
+  "Ange en url till receptet du vill spara eller lägg till ingredienser och instruktioner för att skapa ett eget recept.";
+
 export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categorySuggestions, setCategorySuggestions] = useState<RecipeCategory[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -34,11 +41,24 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    void getCategories()
+      .then(setCategorySuggestions)
+      .catch(() => {
+        setCategorySuggestions([]);
+      });
+  }, [open]);
+
   function resetForm() {
     setName("");
     setUrl("");
     setIngredients("");
     setInstructions("");
+    setCategories([]);
     setError(null);
   }
 
@@ -50,8 +70,9 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!name.trim()) {
-      setError("Receptnamn måste anges");
+    const validationError = validateRecipeInput(name, url, ingredients, instructions);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -64,12 +85,17 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
         url,
         ingredients,
         instructions,
+        categories,
       });
       resetForm();
       onSaved(recipe);
       onClose();
-    } catch {
-      setError("Kunde inte spara receptet. Försök igen.");
+    } catch (submitError) {
+      const message =
+        submitError instanceof Error && submitError.message
+          ? submitError.message
+          : "Kunde inte spara receptet. Försök igen.";
+      setError(message);
     } finally {
       setIsSaving(false);
     }
@@ -97,6 +123,8 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
           </button>
         </div>
 
+        <p className="mb-6 text-sm text-neutral-600">{HELP_TEXT}</p>
+
         <div className="space-y-6">
           <div>
             <label
@@ -113,6 +141,14 @@ export function AddRecipeDialog({ open, onClose, onSaved }: AddRecipeDialogProps
               className="w-full rounded-md border border-neutral-300 px-3 py-2 text-neutral-900"
             />
           </div>
+
+          <CategoryInput
+            categories={categories}
+            onChange={setCategories}
+            suggestions={categorySuggestions}
+            inputTestId="recipe-category-input"
+            addButtonTestId="recipe-category-add"
+          />
 
           <section>
             <h3 className="mb-2 text-sm font-medium text-neutral-700">URL</h3>

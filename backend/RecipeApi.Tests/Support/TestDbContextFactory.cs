@@ -34,6 +34,7 @@ internal sealed class TestDbContextFactory : IAsyncDisposable
     public async Task ResetAsync()
     {
         Context.Recipes.RemoveRange(Context.Recipes);
+        Context.Categories.RemoveRange(Context.Categories);
         await Context.SaveChangesAsync();
     }
 

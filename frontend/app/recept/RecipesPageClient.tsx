@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { AddRecipeDialog } from "@/components/AddRecipeDialog";
 import { RecipeList } from "@/components/RecipeList";
-import { getRecipes } from "@/lib/recipe-service";
+import { getCategories, getRecipes } from "@/lib/recipe-service";
 import {
+  RecipeCategory,
   RecipeDetail,
   RecipeListItem,
   toListItem,
@@ -12,6 +13,7 @@ import {
 
 export function RecipesPageClient() {
   const [recipes, setRecipes] = useState<RecipeListItem[]>([]);
+  const [categorySuggestions, setCategorySuggestions] = useState<RecipeCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -21,8 +23,12 @@ export function RecipesPageClient() {
     setLoadError(null);
 
     try {
-      const data = await getRecipes();
-      setRecipes(data);
+      const [recipeData, categoryData] = await Promise.all([
+        getRecipes(),
+        getCategories(),
+      ]);
+      setRecipes(recipeData);
+      setCategorySuggestions(categoryData);
     } catch {
       setLoadError("Kunde inte ladda receptlistan.");
     } finally {
@@ -36,6 +42,36 @@ export function RecipesPageClient() {
 
   function handleRecipeSaved(recipe: RecipeDetail) {
     setRecipes((current) => [toListItem(recipe), ...current]);
+    setCategorySuggestions((current) => {
+      const merged = new Map(current.map((category) => [category.id, category]));
+      for (const category of recipe.categories) {
+        merged.set(category.id, category);
+      }
+      return [...merged.values()].sort((left, right) =>
+        left.name.localeCompare(right.name, "sv"),
+      );
+    });
+  }
+
+  function handleRecipeUpdated(updatedRecipe: RecipeListItem) {
+    setRecipes((current) =>
+      current.map((recipe) =>
+        recipe.id === updatedRecipe.id ? updatedRecipe : recipe,
+      ),
+    );
+    setCategorySuggestions((current) => {
+      const merged = new Map(current.map((category) => [category.id, category]));
+      for (const category of updatedRecipe.categories) {
+        merged.set(category.id, category);
+      }
+      return [...merged.values()].sort((left, right) =>
+        left.name.localeCompare(right.name, "sv"),
+      );
+    });
+  }
+
+  function handleRecipeDeleted(recipeId: string) {
+    setRecipes((current) => current.filter((recipe) => recipe.id !== recipeId));
   }
 
   return (
@@ -58,7 +94,14 @@ export function RecipesPageClient() {
           {loadError}
         </p>
       )}
-      {!isLoading && !loadError && <RecipeList recipes={recipes} />}
+      {!isLoading && !loadError && (
+        <RecipeList
+          recipes={recipes}
+          categorySuggestions={categorySuggestions}
+          onRecipeUpdated={handleRecipeUpdated}
+          onRecipeDeleted={handleRecipeDeleted}
+        />
+      )}
 
       <AddRecipeDialog
         open={isDialogOpen}

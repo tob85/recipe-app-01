@@ -13,7 +13,8 @@ internal static class RecipeMappings
             Name = recipe.Name,
             Url = recipe.Url,
             RecipeType = ToRecipeType(recipe.RecipeTypeId),
-            Categories = [],
+            Categories = ToCategories(recipe.Categories),
+            Notes = recipe.Notes,
         };
     }
 
@@ -25,10 +26,23 @@ internal static class RecipeMappings
             Name = recipe.Name,
             Url = recipe.Url,
             RecipeType = ToRecipeType(recipe.RecipeTypeId),
-            Categories = [],
+            Categories = ToCategories(recipe.Categories),
+            Notes = recipe.Notes,
             Ingredients = recipe.Ingredients,
             Instructions = recipe.Instructions,
         };
+    }
+
+    private static List<RecipeCategory> ToCategories(IEnumerable<Category> categories)
+    {
+        return categories
+            .OrderBy(category => category.Name)
+            .Select(category => new RecipeCategory
+            {
+                Id = category.Id,
+                Name = category.Name,
+            })
+            .ToList();
     }
 
     public static int ResolveRecipeTypeId(string? url)

@@ -12,7 +12,7 @@ public class RecipeServiceTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _db = await TestDbContextFactory.CreateAsync();
-        _service = new RecipeService(_db.Context);
+        _service = new RecipeService(_db.Context, new CategoryService(_db.Context));
     }
 
     public async Task DisposeAsync()
@@ -31,9 +31,23 @@ public class RecipeServiceTests : IAsyncLifetime
     [Fact]
     public async Task GetAllAsync_ReturnsRecipesOrderedByName()
     {
-        await _service.CreateAsync(new CreateRecipeRequest { Name = "Zucchini" });
-        await _service.CreateAsync(new CreateRecipeRequest { Name = "Apple pie" });
-        await _service.CreateAsync(new CreateRecipeRequest { Name = "Morotsoppa" });
+        await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Zucchini",
+            Ingredients = "Zucchini",
+            Instructions = "Stek",
+        });
+        await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Apple pie",
+            Url = "https://example.com/apple-pie",
+        });
+        await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Morotsoppa",
+            Ingredients = "Morötter",
+            Instructions = "Koka",
+        });
 
         var recipes = await _service.GetAllAsync();
         var names = recipes.Select(recipe => recipe.Name).ToList();
@@ -56,8 +70,8 @@ public class RecipeServiceTests : IAsyncLifetime
         Assert.Equal("https://example.com/pannkakor", recipe.Url);
         Assert.Equal(1, recipe.RecipeType.Id);
         Assert.Equal("Externt", recipe.RecipeType.Name);
-        Assert.Null(recipe.Ingredients);
-        Assert.Null(recipe.Instructions);
+        Assert.Equal("Ska ignoreras", recipe.Ingredients);
+        Assert.Equal("Ska ignoreras", recipe.Instructions);
     }
 
     [Fact]
@@ -99,7 +113,12 @@ public class RecipeServiceTests : IAsyncLifetime
     [Fact]
     public async Task UpdateAsync_UpdatesRecipe_WhenRecipeExists()
     {
-        var created = await _service.CreateAsync(new CreateRecipeRequest { Name = "Soppa" });
+        var created = await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Soppa",
+            Ingredients = "Grönsaker",
+            Instructions = "Koka",
+        });
 
         var updated = await _service.UpdateAsync(created.Id, new UpdateRecipeRequest
         {
@@ -123,9 +142,60 @@ public class RecipeServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task CreateAsync_CreatesRecipeWithCategories_WhenCategoriesAreProvided()
+    {
+        var recipe = await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Pannkakor",
+            Url = "https://example.com/pannkakor",
+            Categories = ["Frukost", "Snabbt"],
+        });
+
+        Assert.Equal(2, recipe.Categories.Count);
+        Assert.Contains(recipe.Categories, category => category.Name == "Frukost");
+        Assert.Contains(recipe.Categories, category => category.Name == "Snabbt");
+    }
+
+    [Fact]
+    public async Task UpdateNotesAsync_UpdatesNotes_WhenRecipeExists()
+    {
+        var created = await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Pannkakor",
+            Url = "https://example.com/pannkakor",
+        });
+
+        var updated = await _service.UpdateNotesAsync(created.Id, "Ta extra vitlök");
+
+        Assert.NotNull(updated);
+        Assert.Equal("Ta extra vitlök", updated.Notes);
+    }
+
+    [Fact]
+    public async Task AddCategoriesAsync_AddsCategoriesToExistingRecipe()
+    {
+        var created = await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Sallad",
+            Url = "https://example.com/sallad",
+        });
+
+        var updated = await _service.AddCategoriesAsync(created.Id, ["Lunch", "Sallad"]);
+
+        Assert.NotNull(updated);
+        Assert.Equal(2, updated.Categories.Count);
+        Assert.Contains(updated.Categories, category => category.Name == "Lunch");
+        Assert.Contains(updated.Categories, category => category.Name == "Sallad");
+    }
+
+    [Fact]
     public async Task DeleteAsync_ReturnsTrue_AndRemovesRecipe_WhenRecipeExists()
     {
-        var created = await _service.CreateAsync(new CreateRecipeRequest { Name = "Sallad" });
+        var created = await _service.CreateAsync(new CreateRecipeRequest
+        {
+            Name = "Sallad",
+            Url = "https://example.com/sallad",
+        });
 
         var deleted = await _service.DeleteAsync(created.Id);
         var recipe = await _service.GetByIdAsync(created.Id);

@@ -13,4 +13,8 @@ public class Recipe
     public string? Ingredients { get; set; }
 
     public string? Instructions { get; set; }
+
+    public string? Notes { get; set; }
+
+    public ICollection<Category> Categories { get; set; } = [];
 }

@@ -11,4 +11,6 @@ public class RecipeListItem
     public RecipeType RecipeType { get; set; } = new();
 
     public List<RecipeCategory> Categories { get; set; } = [];
+
+    public string? Notes { get; set; }
 }

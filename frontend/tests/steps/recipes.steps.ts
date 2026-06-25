@@ -14,6 +14,14 @@ interface RecipeTableRow {
   typ: string;
 }
 
+function parseRecipeTableRows(dataTable: DataTable): RecipeTableRow[] {
+  return dataTable.hashes().map((row) => ({
+    namn: row.namn ?? "",
+    url: row.url ?? "",
+    typ: row.typ ?? "",
+  }));
+}
+
 interface TestRecipe {
   id: string;
   name: string;
@@ -22,6 +30,7 @@ interface TestRecipe {
   categories: [];
   ingredients: string | null;
   instructions: string | null;
+  notes?: string | null;
 }
 
 async function gotoRecipesPage(page: Page): Promise<void> {
@@ -84,7 +93,7 @@ Given("att användaren är på receptsidan", async ({ page }) => {
 Given(
   "att följande recept finns sparade:",
   async ({ page }, dataTable: DataTable) => {
-    const rows = dataTable.hashes() as RecipeTableRow[];
+    const rows = parseRecipeTableRows(dataTable);
     await seedRecipes(page, rows);
   },
 );
@@ -139,6 +148,59 @@ When(
   "användaren anger instruktioner {string}",
   async ({ page }, instructions: string) => {
     await page.locator("#recipe-instructions").fill(instructions);
+  },
+);
+
+When(
+  "användaren lägger till kategorin {string}",
+  async ({ page }, categoryName: string) => {
+    await page.getByTestId("recipe-category-input").fill(categoryName);
+    await page.getByTestId("recipe-category-add").click();
+  },
+);
+
+When(
+  'användaren lägger till kategorin {string} på receptet {string}',
+  async ({ page }, categoryName: string, recipeName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await recipeItem.getByPlaceholder("Lägg till kategori").fill(categoryName);
+    await recipeItem.locator('[data-testid^="recipe-category-add-"]').click();
+  },
+);
+
+When(
+  'användaren anger extra anteckning {string} på receptet {string}',
+  async ({ page }, note: string, recipeName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await recipeItem.getByPlaceholder("Anteckning").fill(note);
+  },
+);
+
+When(
+  'användaren sparar extra anteckningen för receptet {string}',
+  async ({ page }, recipeName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await recipeItem.locator('[data-testid^="recipe-notes-save-"]').click();
+  },
+);
+
+When(
+  'användaren raderar receptet {string}',
+  async ({ page }, recipeName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await recipeItem.getByRole("button", { name: "Radera" }).click();
   },
 );
 
@@ -206,6 +268,11 @@ Then(
   },
 );
 
+Then("dialogen ska innehålla ett avsnitt för kategorier", async ({ page }) => {
+  await expect(page.getByRole("heading", { name: "Kategorier" })).toBeVisible();
+  await expect(page.getByTestId("recipe-category-input")).toBeVisible();
+});
+
 Then(
   "dialogen ska innehålla en knapp för att spara receptet",
   async ({ page }) => {
@@ -221,6 +288,45 @@ Then("receptet ska visas i receptlistan", async ({ page }) => {
   await expect(page.getByTestId("recipe-list")).toBeVisible();
   await expect(page.getByTestId("recipe-list-item")).toHaveCount(1);
 });
+
+Then(
+  'receptet ska visas i receptlistan med kategorin {string}',
+  async ({ page }, categoryName: string) => {
+    await expect(page.getByTestId("recipe-list")).toBeVisible();
+    await expect(page.getByTestId("recipe-list-item")).toHaveCount(1);
+    await expect(page.getByTestId("recipe-category-badge")).toHaveText(categoryName);
+  },
+);
+
+Then(
+  'ska receptet {string} visa kategorin {string}',
+  async ({ page }, recipeName: string, categoryName: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await expect(recipeItem.getByTestId("recipe-category-badge")).toHaveText(categoryName);
+  },
+);
+
+Then(
+  'ska receptet {string} ha extra anteckningen {string}',
+  async ({ page }, recipeName: string, note: string) => {
+    const recipeItem = page
+      .getByTestId("recipe-list-item")
+      .filter({ has: page.getByRole("link", { name: recipeName }) });
+
+    await expect(recipeItem.locator('[data-testid^="recipe-notes-input-"]')).toHaveValue(note);
+  },
+);
+
+Then(
+  'ska receptet {string} inte visas i receptlistan',
+  async ({ page }, recipeName: string) => {
+    await expect(page.getByRole("link", { name: recipeName })).toHaveCount(0);
+    await expect(page.getByTestId("recipe-list-item")).toHaveCount(0);
+  },
+);
 
 Then(
   "receptet ska vara markerat som ett externt recept",
@@ -242,6 +348,25 @@ Then(
     await expect(page.getByText("Receptnamn måste anges")).toBeVisible();
   },
 );
+
+Then(
+  "användaren ska få ett felmeddelande om att receptinnehåll måste anges",
+  async ({ page }) => {
+    await expect(
+      page.getByText(
+        "Ange en URL eller fyll i både ingredienser och instruktioner",
+      ),
+    ).toBeVisible();
+  },
+);
+
+Then("ska dialogen visa hjälptext om hur man lägger till recept", async ({ page }) => {
+  await expect(
+    page.getByText(
+      "Ange en url till receptet du vill spara eller lägg till ingredienser och instruktioner för att skapa ett eget recept.",
+    ),
+  ).toBeVisible();
+});
 
 Then("ska receptets URL öppnas i en ny flik", async ({ page, context }) => {
   await expect

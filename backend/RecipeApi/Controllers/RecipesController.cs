@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using RecipeApi.Models;
 using RecipeApi.Services;
 
+using RecipeApi.Validation;
+
 namespace RecipeApi.Controllers;
 
 [ApiController]
@@ -37,9 +39,15 @@ public class RecipesController(IRecipeService recipeService) : ControllerBase
         [FromBody] CreateRecipeRequest request,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
+        var validationError = RecipeInputValidator.Validate(
+            request.Name,
+            request.Url,
+            request.Ingredients,
+            request.Instructions);
+
+        if (validationError is not null)
         {
-            return BadRequest("Receptnamn måste anges");
+            return BadRequest(validationError);
         }
 
         var recipe = await recipeService.CreateAsync(request, cancellationToken);
@@ -55,9 +63,15 @@ public class RecipesController(IRecipeService recipeService) : ControllerBase
         [FromBody] UpdateRecipeRequest request,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
+        var validationError = RecipeInputValidator.Validate(
+            request.Name,
+            request.Url,
+            request.Ingredients,
+            request.Instructions);
+
+        if (validationError is not null)
         {
-            return BadRequest("Receptnamn måste anges");
+            return BadRequest(validationError);
         }
 
         var recipe = await recipeService.UpdateAsync(id, request, cancellationToken);
@@ -81,5 +95,45 @@ public class RecipesController(IRecipeService recipeService) : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/categories")]
+    [ProducesResponseType(typeof(RecipeDetail), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<RecipeDetail>> AddCategories(
+        Guid id,
+        [FromBody] AddCategoriesRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Names.Count == 0 || request.Names.All(string.IsNullOrWhiteSpace))
+        {
+            return BadRequest("Ange minst en kategori");
+        }
+
+        var recipe = await recipeService.AddCategoriesAsync(id, request.Names, cancellationToken);
+        if (recipe is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(recipe);
+    }
+
+    [HttpPatch("{id:guid}/notes")]
+    [ProducesResponseType(typeof(RecipeDetail), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<RecipeDetail>> UpdateNotes(
+        Guid id,
+        [FromBody] UpdateRecipeNotesRequest request,
+        CancellationToken cancellationToken)
+    {
+        var recipe = await recipeService.UpdateNotesAsync(id, request.Notes, cancellationToken);
+        if (recipe is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(recipe);
     }
 }
