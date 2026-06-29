@@ -1,2 +1,4 @@
 <Solution>
+  <Project Path="RecipeApi/RecipeApi.csproj" />
+  <Project Path="RecipeApi.Tests/RecipeApi.Tests.csproj" />
 </Solution>
